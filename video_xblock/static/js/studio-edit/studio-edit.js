@@ -487,7 +487,7 @@ function StudioEditableXBlock(runtime, element) {
                     processData: false,
                     success: function(response){
                        if(response.status == "error"){
-                         $('#ac-upload-button').text('failed to Upload');
+                         $('#ac-upload-button').text('Failed to Upload');
                          $('#upload-status').text(response.message).css('color', 'red');
                        }else {
                         $('#ac-upload-button').attr('disabled', 'disabled');
