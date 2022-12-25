@@ -74,7 +74,7 @@ class VideoXBlock(
     href = String(
         default='',
         display_name=_('Video URL'),
-        help=_('URL of the video page. E.g. https://example.wistia.com/medias/12345abcde'),
+        help=_('URL of the video page. E.g. https://example.com/media/12345'),
         scope=Scope.content
     )
 
@@ -517,9 +517,11 @@ class VideoXBlock(
         return failed_message
 
     def list_videos(self):
-        # Todo : security issue
-        # 'edspirit-xblock-secret': settings.EDSPIRIT_XBLOCK_SECRET,
-        response = requests.get(AdminConsole.list_url)
+        params = {
+            'edspirit-xblock-secret': settings.EDSPIRIT_XBLOCK_SECRET,
+            "course-id": self.course_key
+            }
+        response = requests.get(AdminConsole.list_url, params=params)
         if response.status_code == 200:
             return response.json()
         return []
