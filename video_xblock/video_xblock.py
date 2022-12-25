@@ -36,7 +36,7 @@ from .backends.base import BaseVideoPlayer
 from .constants import AdminConsole, PlayerName, TranscriptSource
 from .exceptions import ApiClientError
 from .fields import RelativeTime
-from .mixins import ContentStoreMixin, LocationMixin, PlaybackStateMixin, SettingsMixin, TranscriptsMixin
+from .mixins import ContentStoreMixin, LocationMixin, PlaybackStateMixin, SettingsMixin, TranscriptsMixin, UserMixin
 from .settings import ALL_LANGUAGES
 from .utils import (
     create_reference_name, filter_transcripts_by_source, normalize_transcripts,
@@ -51,7 +51,7 @@ log = logging.getLogger(__name__)
 @XBlock.needs('i18n')
 class VideoXBlock(
         SettingsMixin, TranscriptsMixin, PlaybackStateMixin, LocationMixin,
-        StudioEditableXBlockMixin, ContentStoreMixin, WorkbenchMixin, XBlock
+        StudioEditableXBlockMixin, ContentStoreMixin, WorkbenchMixin, UserMixin, XBlock
 ):
     """
     Main VideoXBlock class, responsible for saving video settings and rendering it for students.
@@ -433,12 +433,14 @@ class VideoXBlock(
         admin_console_data = {
             "supported_formats": " ,".join(AdminConsole.supported_formats)
         }
+        edspirit_videos = self.list_videos()
         context = {
             'advanced_fields': advanced_fields,
             'auth_error_message': auth_error_message,
             'basic_fields': basic_fields,
             'admin_console_data': admin_console_data,
             'courseKey': self.course_key,
+            'edspirit_videos': edspirit_videos,
             'languages': languages,
             'player_name': self.player_name,  # for players identification
             'players': PlayerName,
@@ -464,6 +466,7 @@ class VideoXBlock(
         fragment.add_css(resource_string("static/css/transcripts-upload.css"))
         fragment.add_css(resource_string("static/css/studio-edit.css"))
         fragment.add_css(resource_string("static/css/studio-edit-accordion.css"))
+        fragment.add_css(resource_string("static/css/studio-edit-tab-listview.css"))
 
         self.add_i18n_resource(fragment)
         fragment.add_javascript(resource_string("static/js/runtime-handlers.js"))
@@ -490,6 +493,37 @@ class VideoXBlock(
             console_allowed = True
         return console_allowed
 
+    @XBlock.json_handler
+    def delete_video(self, data, suffix=''):
+        failed_message = {"status": "failed", "message": "failed to delete the video"}
+        user = self.get_current_user()
+        user_id = user.opt_attrs.get("edx-platform.user_id"),
+        username = user.opt_attrs.get("edx-platform.username"),
+        course_key = str(self.course_key)
+        if not user.opt_attrs.get("edx-platform.is_authenticated"):
+            return failed_message
+
+        video_id = data.get("videoID")
+        values = {
+            'edspirit-xblock-secret': settings.EDSPIRIT_XBLOCK_SECRET,
+            'course_key': course_key,
+            'video_id': video_id,
+            'user_id': user_id,
+            'username': username
+        }
+        response = requests.post(AdminConsole.delete_url, data=values)
+        if response.status_code == 204:
+            return {"status": "success", "message": "deleted"}
+        return failed_message
+
+    def list_videos(self):
+        # Todo : security issue
+        # 'edspirit-xblock-secret': settings.EDSPIRIT_XBLOCK_SECRET,
+        response = requests.get(AdminConsole.list_url)
+        if response.status_code == 200:
+            return response.json()
+        return []
+
     @XBlock.handler
     def upload_video(self, request, suffix=''):
         if not self.upload_allowed():
@@ -497,6 +531,9 @@ class VideoXBlock(
                 "status": "error",
                 "message": "You're not allowed to upload"
             })
+        user = self.get_current_user()
+        username = user.opt_attrs.get("edx-platform.username"),
+
         upload = request.params["video"]
         if self.file_size_over_limit(upload.file):
             size=AdminConsole.fileupload_max_size
@@ -508,11 +545,14 @@ class VideoXBlock(
         files = {'video': upload.file}
         values = {
             'edspirit-xblock-secret': settings.EDSPIRIT_XBLOCK_SECRET,
-            'course_key': self.course_key
+            'course_key': self.course_key,
+            'username': username
         }
         log.debug('uploading video to Admin Console')
         r = requests.post(url, files=files, data=values)
-        return Response(json_body=r.json())
+        if r.status_code == 200:
+            return Response(json_body=r.json())
+        return Response(json_body={"status": "failed", "message": "failed to upload the video"})
 
     @XBlock.handler
     def render_player(self, _request, _suffix=''):

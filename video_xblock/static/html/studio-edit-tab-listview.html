@@ -1,0 +1,30 @@
+<ul class="list-input settings-list list is-hidden">
+    <table>
+        <thead>
+            <tr>
+                <th>&nbsp;</th>
+                <th>Name</th>
+                <th>Size</th>
+                <th>Timestamp</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for video in videos %}
+            <tr data-id="{{ video.id }}" data-href="{{ video.url }}">
+                <td class="checkbox-wrap">
+                    <input name="item-{{ video.id }}" type="checkbox" class="select">
+                </td>
+                <td class="text">{{ video.name }}</td>
+                <td class="text">{{ video.size }}</td>
+                <td class="text">{{ video.timestamp }}</td>
+                <td>
+                    <button type="button" class="btn btn-primary delete-video">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</ul>

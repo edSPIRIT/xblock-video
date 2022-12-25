@@ -44,43 +44,113 @@ function StudioEditableXBlock(runtime, element) {
     /** Toggle studio editor's current tab.
      */
     function toggleEditorTab(event, tabName) {
-        var $tabDisable;
+        var $tabsDisable;
         var $tabEnable;
-        var $otherTabName;
+        var $otherTabNames;
         if (tabName === 'Basic') {
             $tabEnable = $('.list-input.settings-list.basic');
-            $tabDisable = $('.list-input.settings-list.advanced');
-            $otherTabName = 'Advanced';
+            $tabsDisable = [
+                $('.list-input.settings-list.list'),
+                $('.list-input.settings-list.advanced'),
+            ];
+            $otherTabNames = ['List', 'Advanced'];
         } else if (tabName === 'Advanced') {
             $tabEnable = $('.list-input.settings-list.advanced');
-            $tabDisable = $('.list-input.settings-list.basic');
-            $otherTabName = 'Basic';
+            $tabsDisable = [
+                $('.list-input.settings-list.list'),
+                $('.list-input.settings-list.basic'),
+            ];
+            $otherTabNames = ['List', 'Basic'];
+        } else if (tabName === 'List') {
+            $tabEnable = $('.list-input.settings-list.list');
+            $tabsDisable = [
+                $('.list-input.settings-list.basic'),
+                $('.list-input.settings-list.advanced'),
+            ];
+            $otherTabNames = ['Basic', 'Advanced'];
         }
         $(event.currentTarget).addClass('current');
-        $('.edit-menu-tab[data-tab-name=' + $otherTabName + ']').removeClass('current');
-        $tabDisable.addClass('is-hidden');
+
+        for (const $otherTabName of $otherTabNames) {
+            $('.edit-menu-tab[data-tab-name=' + $otherTabName + ']').removeClass('current');
+        }
+
+        for (const $tabDisable of $tabsDisable) {
+            $tabDisable.addClass('is-hidden');
+        }
         $tabEnable.removeClass('is-hidden');
     }
 
-    // Create advanced and basic tabs
+    // Create basic, advanced, and list tabs
     (function() {
-        if (isNotDummy) {
-            $modalHeaderTabs
-                .append(
-                    '<li class="inner_tab_wrap">' +
-                    '<button class="edit-menu-tab" data-tab-name="Advanced">Advanced</button>' +
-                    '</li>',
+        let $tabs = '<li class="inner_tab_wrap">' +
+                    '<button class="edit-menu-tab" data-tab-name="List">List</button>' +
+                    '</li>' +
                     '<li class="inner_tab_wrap">' +
                     '<button class="edit-menu-tab current" data-tab-name="Basic">Basic</button>' +
-                    '</li>');
-            // Bind listeners to the toggle buttons
-            $('.edit-menu-tab').click(function(event) {
-                currentTabName = $(event.currentTarget).attr('data-tab-name');
-                toggleEditorTab(event, currentTabName);
-            });
+                    '</li>'
+
+        if (isNotDummy) {
+            $tabs = '<li class="inner_tab_wrap">' +
+                    '<button class="edit-menu-tab" data-tab-name="Advanced">Advanced</button>' +
+                    '</li>' + $tabs;
         }
+
+        $modalHeaderTabs.append($tabs);
+        // Bind listeners to the toggle buttons
+        $('.edit-menu-tab').click(function(event) {
+            currentTabName = $(event.currentTarget).attr('data-tab-name');
+            toggleEditorTab(event, currentTabName);
+        });
     }());
 
+    /** ListView section functions
+     */
+
+    let $currentLink = $("#xb-field-edit-href").val();
+
+    $('tr').toArray().forEach(element => {
+        if ($(element).data('href') === $currentLink) {
+            $(element).addClass('selected-row');
+            $(element).find('input').attr('checked','checked');
+        }
+    });
+
+    $(".select").click(function(){
+        let $this = $(this);
+        let $tr = $this.closest("tr");
+        let $allRows = $tr.parent().find('tr');
+        $allRows.find('input').removeAttr('checked');
+        $this.attr('checked','checked');
+        $allRows.removeClass('selected-row');
+        $tr.addClass('selected-row');
+        $("#xb-field-edit-href").val($tr.data("href"));
+    });
+
+    let deleteURL = runtime.handlerUrl(element, 'delete_video');
+
+    $(".delete-video").click(function(e){
+        let $tr = $(this).closest("tr");
+        let $confirm = confirm("Are you sure you want to delete this file? this Action cannot be undone.");
+        if ($confirm){
+            let deleteVideoData = {
+                videoID: $tr.data("id")
+            }
+            $.ajax({
+                type: 'POST',
+                url: deleteURL,
+                data: JSON.stringify(deleteVideoData),
+                dataType: 'json'
+            })
+            .done(function(response) {
+                if (response.status == "success") {
+                    $tr.remove();
+                } else {
+                    console.log(response.message)
+                }
+            });
+        }
+    });
     /** Wrapper function for dispatched ajax calls.
      */
     function ajaxCallDispatch(method, suffix, handlerMethod) {
@@ -398,7 +468,6 @@ function StudioEditableXBlock(runtime, element) {
      */
 
     var uploadVideoUrl = runtime.handlerUrl(element, 'upload_video');
-    console.log(uploadVideoUrl)
     // });
     $('#ac-upload-button').click(function() {
         var fileName = $("#ac-upload-file").val();
@@ -406,9 +475,7 @@ function StudioEditableXBlock(runtime, element) {
         if (fileName) {
             var fd = new FormData();
             $('#ac-upload-button').text('Uploading');
-
             var files = $('#ac-upload-file')[0].files;
-
             if(files.length > 0 ){
                 fd.append('video',files[0]);
 
@@ -419,16 +486,14 @@ function StudioEditableXBlock(runtime, element) {
                     contentType: false,
                     processData: false,
                     success: function(response){
-
                        if(response.status == "error"){
-                         $('#ac-upload-button').text('failed to Upload')
-                         $('#upload-status').text(response.message).css('color', 'red')
+                         $('#ac-upload-button').text('failed to Upload');
+                         $('#upload-status').text(response.message).css('color', 'red');
                        }else {
-                        $('#ac-upload-button').attr('disabled', 'disabled')
-                        $('#xb-field-edit-href').val(response.url)
+                        $('#ac-upload-button').attr('disabled', 'disabled');
+                        $('#xb-field-edit-href').val(response.url);
                         $('#ac-upload-button').text('Uploaded');
-                        $('#upload-status').text(response.message).css('color', 'green')
-
+                        $('#upload-status').text(response.message).css('color', 'green');
                        }
                     },
                  });

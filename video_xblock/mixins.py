@@ -17,6 +17,17 @@ from .utils import import_from, ugettext as _, underscore_to_mixedcase, Transcri
 log = logging.getLogger(__name__)
 
 
+@XBlock.wants('user')
+class UserMixin(XBlock):
+    def get_current_user(self):
+        return self.runtime.service(self, 'user').get_current_user()
+
+    def get_external_user_id(self, type_name):
+        return self.runtime.service(self, 'user').get_external_user_id(type_name)
+
+    def get_anonymous_user_id(self, username, course_id):
+        return self.runtime.service(self, 'user').get_anonymous_user_id(username, course_id)
+
 @XBlock.wants('contentstore')
 class ContentStoreMixin(XBlock):
     """

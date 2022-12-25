@@ -1,0 +1,48 @@
+table {
+    width: 100%;
+}
+
+tr:hover {
+    background-color: beige;
+}
+
+table thead tr:first-child {
+    background-color: #009fe6;
+    color: #fff;
+    height: 50px;
+    cursor: default;
+}
+
+.checkbox-wrap input {
+    cursor: pointer;
+}
+
+
+table tr td:first-child {
+    width: 50px;
+}
+
+table tr td:last-child {
+    width: calc(100% - 50px);
+}
+
+th {
+    font-size: 100%;
+    font-weight: 600;
+    text-align: center;
+    vertical-align: middle;
+}
+
+td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+
+.text {
+    padding: 15px;
+}
+
+.selected-row {
+    background-color: bisque;
+}

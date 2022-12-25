@@ -10,8 +10,8 @@ DEFAULT_LANG = "en"
 SCHEMA = 'http://' if settings.DEBUG else 'https://'
 
 class AdminConsole:
-    fileupload_max_size = 1024 * 1000 * 1000  # 4 MB
-    upload_url = SCHEMA + settings.LMS_BASE + "/admin-console/api/troweb/create/"
+    fileupload_max_size = 1024 * 1000 * 1000  # 1024 MB
+    upload_url = SCHEMA + settings.LMS_BASE + "/admin-console/api/troweb/upload/"
     list_url = SCHEMA + settings.LMS_BASE + "/admin-console/api/troweb/list/"
     delete_url = SCHEMA + settings.LMS_BASE + "/admin-console/api/troweb/delete/"
     upload_allowed_url = SCHEMA + settings.LMS_BASE + "/admin-console/api/troweb/upload-allowed/"
