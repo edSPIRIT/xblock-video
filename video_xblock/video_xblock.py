@@ -519,7 +519,7 @@ class VideoXBlock(
     def list_videos(self):
         params = {
             'edspirit-xblock-secret': settings.EDSPIRIT_XBLOCK_SECRET,
-            "course-id": self.course_key
+            "course-id": str(self.course_key)
             }
         response = requests.get(AdminConsole.list_url, params=params)
         if response.status_code == 200:
