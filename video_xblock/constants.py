@@ -46,6 +46,7 @@ class PlayerName:
     BRIGHTCOVE = "brightcove-player"
     DUMMY = "dummy-player"
     HTML5 = "html5-player"
+    TROWEB = "troweb-player"
     VIMEO = "vimeo-player"
     WISTIA = "wistia-player"
     YOUTUBE = "youtube-player"

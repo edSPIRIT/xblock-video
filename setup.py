@@ -65,6 +65,7 @@ setup(
             'dummy-player = video_xblock.backends.dummy:DummyPlayer',
             'vimeo-player = video_xblock.backends.vimeo:VimeoPlayer',
             'html5-player = video_xblock.backends.html5:Html5Player',
+            'troweb-player = video_xblock.backends.troweb:TrowebPlayer',
         ]
     },
     package_data=package_data("video_xblock", [
