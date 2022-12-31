@@ -483,11 +483,9 @@ class VideoXBlock(
         """
         console_allowed = False
         url = AdminConsole.upload_allowed_url
-        values = {
-            'edspirit-xblock-secret': settings.EDSPIRIT_XBLOCK_SECRET,
-        }
+
         log.debug("request upload allowed to admin console")
-        r = requests.post(url, data=values)
+        r = requests.get(url)
         if r.status_code == 200:
             log.debug("upload allowed")
             console_allowed = True
@@ -505,7 +503,7 @@ class VideoXBlock(
 
         video_id = data.get("videoID")
         values = {
-            'edspirit-xblock-secret': settings.EDSPIRIT_XBLOCK_SECRET,
+            'edspirit_xblock_secret': settings.EDSPIRIT_XBLOCK_SECRET,
             'course_key': course_key,
             'video_id': video_id,
             'user_id': user_id,
@@ -518,8 +516,8 @@ class VideoXBlock(
 
     def list_videos(self):
         params = {
-            'edspirit-xblock-secret': settings.EDSPIRIT_XBLOCK_SECRET,
-            "course-id": str(self.course_key)
+            'edspirit_xblock_secret': settings.EDSPIRIT_XBLOCK_SECRET,
+            "course_id": str(self.course_key)
             }
         response = requests.get(AdminConsole.list_url, params=params)
         if response.status_code == 200:
@@ -536,25 +534,26 @@ class VideoXBlock(
         user = self.get_current_user()
         username = user.opt_attrs.get("edx-platform.username"),
 
-        upload = request.params["video"]
+        upload = request.POST.getone("video").file
         if self.file_size_over_limit(upload.file):
             size=AdminConsole.fileupload_max_size
             return Response(json_body={
                 "status": "error",
                 "message": f"Unable to upload file. Max size limit is {size}"
             })
+        upload.file.seek(0)
         url = AdminConsole.upload_url
-        files = {'video': upload.file}
+        files = [('file', (upload.name, upload.file, upload.content_type))]
         values = {
-            'edspirit-xblock-secret': settings.EDSPIRIT_XBLOCK_SECRET,
-            'course_key': self.course_key,
+            'edspirit_xblock_secret': settings.EDSPIRIT_XBLOCK_SECRET,
+            'course_id': str(self.course_key),
             'username': username
         }
         log.debug('uploading video to Admin Console')
         r = requests.post(url, files=files, data=values)
         if r.status_code == 200:
             return Response(json_body=r.json())
-        return Response(json_body={"status": "failed", "message": "failed to upload the video"})
+        return Response(json_body={"status": "error", "message": "failed to upload the video"})
 
     @XBlock.handler
     def render_player(self, _request, _suffix=''):
