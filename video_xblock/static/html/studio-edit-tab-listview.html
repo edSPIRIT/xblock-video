@@ -11,9 +11,9 @@
         </thead>
         <tbody>
             {% for video in videos %}
-            <tr data-id="{{ video.id }}" data-href="{{ video.url }}">
+            <tr data-id="{{ video.item_id }}" data-href="{{ video.url }}">
                 <td class="checkbox-wrap">
-                    <input name="item-{{ video.id }}" type="checkbox" class="select">
+                    <input name="item-{{ video.item_id }}" type="checkbox" class="select">
                 </td>
                 <td class="text">{{ video.name }}</td>
                 <td class="text">{{ video.size }}</td>
