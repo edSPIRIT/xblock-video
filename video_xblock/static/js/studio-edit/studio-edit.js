@@ -145,6 +145,7 @@ function StudioEditableXBlock(runtime, element) {
             .done(function(response) {
                 if (response.status == "success") {
                     $tr.remove();
+                    $('#xb-field-edit-href').val('');
                 } else {
                     console.log(response.message)
                 }
