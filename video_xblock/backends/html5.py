@@ -12,7 +12,7 @@ class Html5Player(BaseVideoPlayer):
     Html5Player is used for videos by providing direct URL.
     """
 
-    url_re = url_re = re.compile(r'^(?P<protocol>https?|ftp)://[^\s/$.?#].[^\s]*.(?P<extension>mpeg|mp4|ogg|webm)')
+    url_re = re.compile(r'^(?P<protocol>https?|ftp)://[^\s/$.?#].[^\s]*.(?P<extension>mpeg|mp4|ogg|webm)')
 
     @property
     def advanced_fields(self):
