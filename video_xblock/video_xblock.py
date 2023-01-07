@@ -516,11 +516,12 @@ class VideoXBlock(
             return {"status": "success", "message": "deleted"}
         return failed_message
 
-    def list_videos(self, search_query=None):
+    def list_videos(self, search_query=None, page=1):
         params = {
             'edspirit_xblock_secret': settings.EDSPIRIT_XBLOCK_SECRET,
             "course_id": str(self.course_key),
-            "search_query": search_query
+            "search_query": search_query,
+            "page": page
             }
         response = requests.get(AdminConsole.list_url, params=params)
         if response.status_code == 200:
@@ -530,7 +531,8 @@ class VideoXBlock(
     @XBlock.json_handler
     def search_videos(self, data, suffix=''):
         search_query = data.get("search_query")
-        videos = self.list_videos(search_query)
+        page = data.get("page")
+        videos = self.list_videos(search_query, page)
         return videos
 
 

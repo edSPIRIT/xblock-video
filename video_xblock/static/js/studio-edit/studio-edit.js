@@ -854,6 +854,18 @@ function StudioEditableXBlock(runtime, element) {
             i++;
         }
     }
+    let $trowebVideosPage = $("#video-list-page-select");
+    function updatePages(response) {
+        let pageCount = Math.floor(response.count/10)
+        let i = 0;
+        $trowebVideosPage.empty();
+        while(i < pageCount + 1){
+            let option = `<option value="${i+1}">${i+1}</option>`;
+            $trowebVideosPage.append(option)
+            i++;
+        }
+
+    }
     let $trowebSearchInput = $("#search-troweb-videos");
     $trowebSearchInput.on("input", function () {
         let $this = $(this);
@@ -865,10 +877,29 @@ function StudioEditableXBlock(runtime, element) {
         })
             .done(function (response) {
                 updateVideoList(response);
+                updatePages(response);
+                $trowebVideosPage.val(1);
             })
             .fail(function (response) {
                 console.log("failed to get video list");
-                console.log(response);
             });
     });
+
+    $trowebVideosPage.on("change", function(){
+        let $this = $(this);
+        $("#search-troweb-videos");
+        $.ajax({
+            type: "POST",
+            url: searchURL,
+            data: JSON.stringify({ "search_query": $("#search-troweb-videos").val(), "page": $this.val() }),
+            dataType: "json",
+        })
+            .done(function (response) {
+                updateVideoList(response);
+            })
+            .fail(function (response) {
+                console.log("failed to get video list");
+            });
+
+    })
 }
