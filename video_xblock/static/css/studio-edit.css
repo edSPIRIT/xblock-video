@@ -309,3 +309,11 @@ div.video-list-pagination {
   bottom: 1%;
   z-index: 999;
 }
+
+.video-list-page {
+  position: absolute;
+  right: 0%;
+  padding-right: 10rem;
+  bottom: 1%;
+  z-index: 999;
+}

@@ -29,7 +29,22 @@
             {% endfor %}
         </tbody>
     </table>
+    <div>
     <div class="form-control video-name-search"><input type="text" id="search-troweb-videos" size="45" name="search_query"
             placeholder="Search videos...">
     </div>
+    <div class="video-list-page">
+        <select name="video-list-page" id="video-list-page-select">
+            {% if pages %}
+            {% for page in pages %}
+            <option value="{{page}}">{{page}}</option>
+            {% endfor %}
+            {% else %}
+            <option value="">0</option>
+            {% endif %}
+        </select>
+    </div>
+
+    </div>
+
 </ul>

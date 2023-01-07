@@ -442,6 +442,7 @@ class VideoXBlock(
             'admin_console_data': admin_console_data,
             'courseKey': self.course_key,
             'edspirit_videos': edspirit_videos,
+            'video_pages': list(range(1, (int(edspirit_videos["count"])//10) + 2) ),
             'languages': languages,
             'player_name': self.player_name,  # for players identification
             'players': PlayerName,
