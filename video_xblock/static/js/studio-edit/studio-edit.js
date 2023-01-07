@@ -834,8 +834,10 @@ function StudioEditableXBlock(runtime, element) {
     function updateVideoList(response) {
         let $table_body = $("#video-table-body");
         $table_body.empty();
+        let i = 1;
         for (const video of response.results) {
             let video_tr = `<tr data-id="${video.item_id}" data-href="${video.url}">
+            <td> ${i} </td>
             <td class="checkbox-wrap">
                 <input name="item-${video.item_id}" type="checkbox" class="select">
             </td>
@@ -849,6 +851,7 @@ function StudioEditableXBlock(runtime, element) {
             </td>
             </tr>`;
             $table_body.append(video_tr);
+            i++;
         }
     }
     let $trowebSearchInput = $("#search-troweb-videos");

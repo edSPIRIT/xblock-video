@@ -2,6 +2,7 @@
     <table>
         <thead>
             <tr>
+                <th>#</th>
                 <th>&nbsp;</th>
                 <th>Name</th>
                 <th>Size</th>
@@ -12,6 +13,7 @@
         <tbody id="video-table-body">
             {% for video in videos.results %}
             <tr data-id="{{ video.item_id }}" data-href="{{ video.url }}">
+                <td>{{ forloop.counter }}</td>
                 <td class="checkbox-wrap">
                     <input name="item-{{ video.item_id }}" type="checkbox" class="select">
                 </td>
