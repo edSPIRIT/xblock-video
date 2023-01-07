@@ -305,6 +305,7 @@ div.video-list-pagination {
 
 .video-name-search {
   position: absolute;
-  right: 5px;
-  bottom: 14%;
+  right: 0%;
+  bottom: 1%;
+  z-index: 999;
 }
