@@ -296,3 +296,15 @@ div.upload input[type="file"] {
   position:absolute;
   left:0;
 }
+
+div.video-list-pagination {
+  margin-top: 2rem;
+  text-align: center;
+  background-color: #e5e5e5;
+}
+
+.video-name-search {
+  position: absolute;
+  right: 5px;
+  bottom: 14%;
+}
