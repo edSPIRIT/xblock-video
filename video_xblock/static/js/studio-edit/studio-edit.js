@@ -828,4 +828,44 @@ function StudioEditableXBlock(runtime, element) {
         $availableLabel.toggleClass('is-hidden', $('.available-default-transcripts-section:visible').length);
     });
     // End of Raccoongang addons
+    // Edspirit Addons
+    let searchURL = runtime.handlerUrl(element, "search_videos");
+
+    function updateVideoList(response) {
+        let $table_body = $("#video-table-body");
+        $table_body.empty();
+        for (const video of response.results) {
+            let video_tr = `<tr data-id="${video.item_id}" data-href="${video.url}">
+            <td class="checkbox-wrap">
+                <input name="item-${video.item_id}" type="checkbox" class="select">
+            </td>
+            <td class="text">${video.name}</td>
+            <td class="text">${video.size}</td>
+            <td class="text">${video.timestamp}</td>
+            <td>
+                <button type="button" class="btn btn-primary delete-video">
+                    <i class="fa fa-trash"></i>
+                </button>
+            </td>
+            </tr>`;
+            $table_body.append(video_tr);
+        }
+    }
+    let $trowebSearchInput = $("#search-troweb-videos");
+    $trowebSearchInput.on("input", function () {
+        let $this = $(this);
+        $.ajax({
+            type: "POST",
+            url: searchURL,
+            data: JSON.stringify({"search_query": $this.val()}),
+            dataType: "json",
+        })
+            .done(function (response) {
+                updateVideoList(response);
+            })
+            .fail(function (response) {
+                console.log("failed to get video list");
+                console.log(response);
+            });
+    });
 }

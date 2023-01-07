@@ -431,7 +431,8 @@ class VideoXBlock(
         basic_fields = self.prepare_studio_editor_fields(player.basic_fields)
         advanced_fields = self.prepare_studio_editor_fields(player.advanced_fields)
         admin_console_data = {
-            "supported_formats": " ,".join(AdminConsole.supported_formats)
+            "supported_formats": " ,".join(AdminConsole.supported_formats),
+            "list_url": AdminConsole.list_url
         }
         edspirit_videos = self.list_videos()
         context = {
@@ -514,15 +515,23 @@ class VideoXBlock(
             return {"status": "success", "message": "deleted"}
         return failed_message
 
-    def list_videos(self):
+    def list_videos(self, search_query=None):
         params = {
             'edspirit_xblock_secret': settings.EDSPIRIT_XBLOCK_SECRET,
-            "course_id": str(self.course_key)
+            "course_id": str(self.course_key),
+            "search_query": search_query
             }
         response = requests.get(AdminConsole.list_url, params=params)
         if response.status_code == 200:
             return response.json()
         return []
+
+    @XBlock.json_handler
+    def search_videos(self, data, suffix=''):
+        search_query = data.get("search_query")
+        videos = self.list_videos(search_query)
+        return videos
+
 
     @XBlock.handler
     def upload_video(self, request, suffix=''):
