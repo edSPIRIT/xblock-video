@@ -9,8 +9,8 @@
                 <th>Action</th>
             </tr>
         </thead>
-        <tbody>
-            {% for video in videos %}
+        <tbody id="video-table-body">
+            {% for video in videos.results %}
             <tr data-id="{{ video.item_id }}" data-href="{{ video.url }}">
                 <td class="checkbox-wrap">
                     <input name="item-{{ video.item_id }}" type="checkbox" class="select">
@@ -27,4 +27,10 @@
             {% endfor %}
         </tbody>
     </table>
+    <div>
+    <div class="form-control video-name-search"><input type="text" id="search-troweb-videos" size="45" name="search_query"
+            placeholder="Search videos...">
+    </div>
+    <div class="video-list-page" id="pagination-container"></div>
+
 </ul>

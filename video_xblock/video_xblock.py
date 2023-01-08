@@ -431,7 +431,8 @@ class VideoXBlock(
         basic_fields = self.prepare_studio_editor_fields(player.basic_fields)
         advanced_fields = self.prepare_studio_editor_fields(player.advanced_fields)
         admin_console_data = {
-            "supported_formats": " ,".join(AdminConsole.supported_formats)
+            "supported_formats": " ,".join(AdminConsole.supported_formats),
+            "list_url": AdminConsole.list_url
         }
         edspirit_videos = self.list_videos()
         context = {
@@ -441,6 +442,7 @@ class VideoXBlock(
             'admin_console_data': admin_console_data,
             'courseKey': self.course_key,
             'edspirit_videos': edspirit_videos,
+            'video_pages': list(range(1, (int(edspirit_videos["count"])//10) + 2) ),
             'languages': languages,
             'player_name': self.player_name,  # for players identification
             'players': PlayerName,
@@ -467,6 +469,8 @@ class VideoXBlock(
         fragment.add_css(resource_string("static/css/studio-edit.css"))
         fragment.add_css(resource_string("static/css/studio-edit-accordion.css"))
         fragment.add_css(resource_string("static/css/studio-edit-tab-listview.css"))
+        fragment.add_css(resource_string("static/vendor/css/pagination.css"))
+
 
         self.add_i18n_resource(fragment)
         fragment.add_javascript(resource_string("static/js/runtime-handlers.js"))
@@ -474,6 +478,7 @@ class VideoXBlock(
         fragment.add_javascript(resource_string("static/js/studio-edit/studio-edit.js"))
         fragment.add_javascript(resource_string("static/js/studio-edit/transcripts-autoload.js"))
         fragment.add_javascript(resource_string("static/js/studio-edit/transcripts-manual-upload.js"))
+        fragment.add_javascript(resource_string("static/vendor/js/pagination.min.js"))
         fragment.initialize_js('StudioEditableXBlock')
         return fragment
 
@@ -514,15 +519,25 @@ class VideoXBlock(
             return {"status": "success", "message": "deleted"}
         return failed_message
 
-    def list_videos(self):
-        params = {
+    def list_videos(self, search_query=None, page=1):
+        data = {
             'edspirit_xblock_secret': settings.EDSPIRIT_XBLOCK_SECRET,
-            "course_id": str(self.course_key)
+            "course_id": str(self.course_key),
+            "search_query": search_query,
             }
-        response = requests.get(AdminConsole.list_url, params=params)
+        params = {"page": page}
+        response = requests.post(AdminConsole.list_url, data=data, params=params)
         if response.status_code == 200:
             return response.json()
         return []
+
+    @XBlock.handler
+    def search_videos(self, request, search_query, suffix=''):
+        search_query = request.params.get("search_query")
+        page = request.params.get("page")
+        videos = self.list_videos(search_query, page)
+        return Response(json_body=videos)
+
 
     @XBlock.handler
     def upload_video(self, request, suffix=''):
