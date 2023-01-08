@@ -104,54 +104,6 @@ function StudioEditableXBlock(runtime, element) {
         });
     }());
 
-    /** ListView section functions
-     */
-
-    let $currentLink = $("#xb-field-edit-href").val();
-
-    $('tr').toArray().forEach(element => {
-        if ($(element).data('href') === $currentLink) {
-            $(element).addClass('selected-row');
-            $(element).find('input').attr('checked','checked');
-        }
-    });
-
-    $(".select").click(function(){
-        let $this = $(this);
-        let $tr = $this.closest("tr");
-        let $allRows = $tr.parent().find('tr');
-        $allRows.find('input').removeAttr('checked');
-        $this.attr('checked','checked');
-        $allRows.removeClass('selected-row');
-        $tr.addClass('selected-row');
-        $("#xb-field-edit-href").val($tr.data("href"));
-    });
-
-    let deleteURL = runtime.handlerUrl(element, 'delete_video');
-
-    $(".delete-video").click(function(e){
-        let $tr = $(this).closest("tr");
-        let $confirm = confirm("Are you sure you want to delete this file? this Action cannot be undone.");
-        if ($confirm){
-            let deleteVideoData = {
-                videoID: $tr.data("id")
-            }
-            $.ajax({
-                type: 'POST',
-                url: deleteURL,
-                data: JSON.stringify(deleteVideoData),
-                dataType: 'json'
-            })
-            .done(function(response) {
-                if (response.status == "success") {
-                    $tr.remove();
-                    $('#xb-field-edit-href').val('');
-                } else {
-                    console.log(response.message)
-                }
-            });
-        }
-    });
     /** Wrapper function for dispatched ajax calls.
      */
     function ajaxCallDispatch(method, suffix, handlerMethod) {
@@ -828,44 +780,9 @@ function StudioEditableXBlock(runtime, element) {
         $availableLabel.toggleClass('is-hidden', $('.available-default-transcripts-section:visible').length);
     });
     // End of Raccoongang addons
+
     // Edspirit Addons
     let searchURL = runtime.handlerUrl(element, "search_videos");
-
-    function updateVideoList(response) {
-        let $table_body = $("#video-table-body");
-        $table_body.empty();
-        let i = 1;
-        for (const video of response.results) {
-            let video_tr = `<tr data-id="${video.item_id}" data-href="${video.url}">
-            <td> ${i} </td>
-            <td class="checkbox-wrap">
-                <input name="item-${video.item_id}" type="checkbox" class="select">
-            </td>
-            <td class="text">${video.name}</td>
-            <td class="text">${video.size}</td>
-            <td class="text">${video.timestamp}</td>
-            <td>
-                <button type="button" class="btn btn-primary delete-video">
-                    <i class="fa fa-trash"></i>
-                </button>
-            </td>
-            </tr>`;
-            $table_body.append(video_tr);
-            i++;
-        }
-    }
-    let $trowebVideosPage = $("#video-list-page-select");
-    function updatePages(response) {
-        let pageCount = Math.floor(response.count/10)
-        let i = 0;
-        $trowebVideosPage.empty();
-        while(i < pageCount + 1){
-            let option = `<option value="${i+1}">${i+1}</option>`;
-            $trowebVideosPage.append(option)
-            i++;
-        }
-
-    }
     let $trowebSearchInput = $("#search-troweb-videos");
     var delayTimer;
     $trowebSearchInput.on("input", function () {
@@ -881,7 +798,7 @@ function StudioEditableXBlock(runtime, element) {
     function simpleTemplating(data) {
         let html = ""
         $.each(data, function (index, item) {
-            html += `<tr data-id="${item.item_id}" data-href="{{ video.url }}">
+            html += `<tr data-id="${item.item_id}" data-href="${ item.url }">
                 <td class="checkbox-wrap">
                     <input name="item-${item.item_id}" type="checkbox" class="select">
                 </td>
@@ -897,21 +814,21 @@ function StudioEditableXBlock(runtime, element) {
         });
         return html;
     }
-    let updatePagination = function(endpoint) {
+    let updatePagination = function (endpoint) {
         $("#pagination-container").pagination({
             alias: {
                 pageNumber: "page",
                 pageSize: "limit",
             },
             ajax: {
-                beforeSend: function() {
+                beforeSend: function () {
                     let $videoTableBody = $("#video-table-body");
                     $videoTableBody.empty();
                     $videoTableBody.html(`
                         <p style="text-align: center;position: absolute; left: 45%; top: 50%;">
                             fetching videos...
                         </p>`);
-                }
+                },
             },
             locator: "results",
             pageSize: 10,
@@ -925,8 +842,58 @@ function StudioEditableXBlock(runtime, element) {
                 $videoTableBody.empty();
                 var html = simpleTemplating(data);
                 $videoTableBody.html(html);
+                /** ListView section functions
+                 */
+                let $currentLink = $("#xb-field-edit-href").val();
+
+                $("tr")
+                    .toArray()
+                    .forEach((element) => {
+                        if ($(element).data("href") === $currentLink) {
+                            $(element).addClass("selected-row");
+                            $(element).find("input").attr("checked", "checked");
+                        }
+                    });
+
+                $(".select").click(function () {
+                    let $this = $(this);
+                    let $tr = $this.closest("tr");
+                    let $allRows = $tr.parent().find("tr");
+                    $allRows.find("input").removeAttr("checked");
+                    $this.attr("checked", "checked");
+                    $allRows.removeClass("selected-row");
+                    $tr.addClass("selected-row");
+                    $("#xb-field-edit-href").val($tr.data("href"));
+                });
+
+                let deleteURL = runtime.handlerUrl(element, "delete_video");
+
+                $(".delete-video").click(function (e) {
+                    let $tr = $(this).closest("tr");
+                    let $confirm = confirm(
+                        "Are you sure you want to delete this file? this Action cannot be undone."
+                    );
+                    if ($confirm) {
+                        let deleteVideoData = {
+                            videoID: $tr.data("id"),
+                        };
+                        $.ajax({
+                            type: "POST",
+                            url: deleteURL,
+                            data: JSON.stringify(deleteVideoData),
+                            dataType: "json",
+                        }).done(function (response) {
+                            if (response.status == "success") {
+                                $tr.remove();
+                                $("#xb-field-edit-href").val("");
+                            } else {
+                                console.log(response.message);
+                            }
+                        });
+                    }
+                });
             },
         });
-    }
+    };
     updatePagination(searchURL);
 }
