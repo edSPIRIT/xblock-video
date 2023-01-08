@@ -867,39 +867,66 @@ function StudioEditableXBlock(runtime, element) {
 
     }
     let $trowebSearchInput = $("#search-troweb-videos");
+    var delayTimer;
     $trowebSearchInput.on("input", function () {
-        let $this = $(this);
-        $.ajax({
-            type: "POST",
-            url: searchURL,
-            data: JSON.stringify({"search_query": $this.val()}),
-            dataType: "json",
-        })
-            .done(function (response) {
-                updateVideoList(response);
-                updatePages(response);
-                $trowebVideosPage.val(1);
-            })
-            .fail(function (response) {
-                console.log("failed to get video list");
-            });
-    });
-
-    $trowebVideosPage.on("change", function(){
-        let $this = $(this);
-        $("#search-troweb-videos");
-        $.ajax({
-            type: "POST",
-            url: searchURL,
-            data: JSON.stringify({ "search_query": $("#search-troweb-videos").val(), "page": $this.val() }),
-            dataType: "json",
-        })
-            .done(function (response) {
-                updateVideoList(response);
-            })
-            .fail(function (response) {
-                console.log("failed to get video list");
-            });
+        let query = $(this).val();
+        clearTimeout(delayTimer);
+        delayTimer = setTimeout(function () {
+            let endpoint = searchURL + `?search_query=${query}`;
+            updatePagination(endpoint);
+        }, 1000); // Will do the ajax stuff after 1000 ms, or 1 s
 
     })
+
+    function simpleTemplating(data) {
+        let html = ""
+        $.each(data, function (index, item) {
+            html += `<tr data-id="${item.item_id}" data-href="{{ video.url }}">
+                <td class="checkbox-wrap">
+                    <input name="item-${item.item_id}" type="checkbox" class="select">
+                </td>
+                <td class="text">${item.name}</td>
+                <td class="text">${item.size}</td>
+                <td class="text">${item.timestamp}</td>
+                <td>
+                    <button type="button" class="btn btn-primary delete-video">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </td>
+            </tr>`;
+        });
+        return html;
+    }
+    let updatePagination = function(endpoint) {
+        $("#pagination-container").pagination({
+            alias: {
+                pageNumber: "page",
+                pageSize: "limit",
+            },
+            ajax: {
+                beforeSend: function() {
+                    let $videoTableBody = $("#video-table-body");
+                    $videoTableBody.empty();
+                    $videoTableBody.html(`
+                        <p style="text-align: center;position: absolute; left: 45%; top: 50%;">
+                            fetching videos...
+                        </p>`);
+                }
+            },
+            locator: "results",
+            pageSize: 10,
+            dataSource: endpoint,
+            totalNumberLocator: function (response) {
+                return response.count;
+            },
+            className: "paginationjs-theme-blue paginationjs-big",
+            callback: function (data, pagination) {
+                let $videoTableBody = $("#video-table-body");
+                $videoTableBody.empty();
+                var html = simpleTemplating(data);
+                $videoTableBody.html(html);
+            },
+        });
+    }
+    updatePagination(searchURL);
 }

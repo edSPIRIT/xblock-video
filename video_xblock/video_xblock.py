@@ -469,6 +469,8 @@ class VideoXBlock(
         fragment.add_css(resource_string("static/css/studio-edit.css"))
         fragment.add_css(resource_string("static/css/studio-edit-accordion.css"))
         fragment.add_css(resource_string("static/css/studio-edit-tab-listview.css"))
+        fragment.add_css(resource_string("static/vendor/css/pagination.css"))
+
 
         self.add_i18n_resource(fragment)
         fragment.add_javascript(resource_string("static/js/runtime-handlers.js"))
@@ -476,6 +478,7 @@ class VideoXBlock(
         fragment.add_javascript(resource_string("static/js/studio-edit/studio-edit.js"))
         fragment.add_javascript(resource_string("static/js/studio-edit/transcripts-autoload.js"))
         fragment.add_javascript(resource_string("static/js/studio-edit/transcripts-manual-upload.js"))
+        fragment.add_javascript(resource_string("static/vendor/js/pagination.min.js"))
         fragment.initialize_js('StudioEditableXBlock')
         return fragment
 
@@ -517,23 +520,23 @@ class VideoXBlock(
         return failed_message
 
     def list_videos(self, search_query=None, page=1):
-        params = {
+        data = {
             'edspirit_xblock_secret': settings.EDSPIRIT_XBLOCK_SECRET,
             "course_id": str(self.course_key),
             "search_query": search_query,
-            "page": page
             }
-        response = requests.get(AdminConsole.list_url, params=params)
+        params = {"page": page}
+        response = requests.post(AdminConsole.list_url, data=data, params=params)
         if response.status_code == 200:
             return response.json()
         return []
 
-    @XBlock.json_handler
-    def search_videos(self, data, suffix=''):
-        search_query = data.get("search_query")
-        page = data.get("page")
+    @XBlock.handler
+    def search_videos(self, request, search_query, suffix=''):
+        search_query = request.params.get("search_query")
+        page = request.params.get("page")
         videos = self.list_videos(search_query, page)
-        return videos
+        return Response(json_body=videos)
 
 
     @XBlock.handler

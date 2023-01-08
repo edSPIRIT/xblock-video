@@ -2,7 +2,6 @@
     <table>
         <thead>
             <tr>
-                <th>#</th>
                 <th>&nbsp;</th>
                 <th>Name</th>
                 <th>Size</th>
@@ -13,7 +12,6 @@
         <tbody id="video-table-body">
             {% for video in videos.results %}
             <tr data-id="{{ video.item_id }}" data-href="{{ video.url }}">
-                <td>{{ forloop.counter }}</td>
                 <td class="checkbox-wrap">
                     <input name="item-{{ video.item_id }}" type="checkbox" class="select">
                 </td>
@@ -33,18 +31,6 @@
     <div class="form-control video-name-search"><input type="text" id="search-troweb-videos" size="45" name="search_query"
             placeholder="Search videos...">
     </div>
-    <div class="video-list-page">
-        <select name="video-list-page" id="video-list-page-select">
-            {% if pages %}
-            {% for page in pages %}
-            <option value="{{page}}">{{page}}</option>
-            {% endfor %}
-            {% else %}
-            <option value="">1</option>
-            {% endif %}
-        </select>
-    </div>
-
-    </div>
+    <div class="video-list-page" id="pagination-container"></div>
 
 </ul>
