@@ -447,6 +447,7 @@ function StudioEditableXBlock(runtime, element) {
                         $('#xb-field-edit-href').val(response.url);
                         $('#ac-upload-button').text('Uploaded');
                         $('#upload-status').text(response.message).css('color', 'green');
+                        updatePagination(searchURL);
                        }
                     },
                  });
